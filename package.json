@@ -20,6 +20,7 @@
     "koa": "^2.2.0",
     "koa-router": "^7.2.0",
     "pidusage": "^1.1.5",
-    "socket.io": "^2.0.2"
+    "socket.io": "^2.0.2",
+    "tslint": "^5.4.2"
   }
 }
