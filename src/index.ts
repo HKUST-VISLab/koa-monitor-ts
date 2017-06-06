@@ -1,9 +1,15 @@
 "use strict";
+
+
 import * as pidusage from "pidusage";
 import * as socketIo from "socket.io";
+import * as handlebars from "handlebars";
+import * as path from "path";
+import * as fs from "mz/fs";
 
 
 export let GLOBALCONFIG = {
+    path: "/status",
     timeout: 2,
     monitorLength: 20,
     spans: [{
@@ -66,7 +72,7 @@ function collectUsage(span) {
 
 function responseCount(lastResponses) {
     lastResponses.forEach((lastResponse) => {
-        if (!lastResponse) {return; }
+        if (!lastResponse) { return; }
         lastResponse.count++;
         const meanTime: number = lastResponse.responseTime;
         lastResponse.responseTime = meanTime + (GLOBALCONFIG.timeout * 1000 - meanTime) / lastResponse.count;
@@ -75,7 +81,7 @@ function responseCount(lastResponses) {
 
 function responseTime(startTime, lastResponses) {
     lastResponses.forEach((lastResponse) => {
-        if (!lastResponse) {return; }
+        if (!lastResponse) { return; }
         let responseTime: number = process.hrtime(startTime);
         responseTime = responseTime[0] * 10e3 + responseTime[1] * 10E-6;
         const meanTime: number = lastResponse.responseTime;
@@ -94,18 +100,28 @@ function startMonitoring() {
 
 function emitStat(span) {
     io.emit("stats", {
-      responses: span.responses[span.responses.length - 2],
-      timeRange: span.timeRange,
+        responses: span.responses[span.responses.length - 2],
+        timeRange: span.timeRange,
     });
-} 
+}
+
 
 export default function monitoringMiddlewareWrapper(app, config) {
-    io = socketIo(app)
-    io.on('connection',(socket)=>{
-        console.log('connected');
+    io = socketIo().listen(app);
+    io.on('connection', (socket) => {
+        console.log('Connected');
+        socket.emit('welcome', { message: 'Welcome!', id: socket.id });
     })
     startMonitoring();
+
     return async function monitoring(ctx, next) {
+        const htmlFilePath = path.join(__dirname, "index.html");
+        const monitoringHtml = fs.readFileSync(htmlFilePath, { encoding: "utf8" })
+        const template = handlebars.compile(monitoringHtml)
+        if (ctx.path === GLOBALCONFIG.path) {
+            ctx.body = template(GLOBALCONFIG);
+        }
+        ctx.body = template(GLOBALCONFIG)
         const startTime = process.hrtime();
         const lastResponses = [];
         GLOBALCONFIG.spans.forEach((span) => {

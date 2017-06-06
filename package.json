@@ -18,8 +18,10 @@
   "homepage": "https://github.com/HKUST-VISLab/koa-monitor-ts#readme",
   "dependencies": {
     "@types/socket.io": "^1.4.29",
+    "handlebars": "^4.0.10",
     "koa": "^2.2.0",
     "koa-router": "^7.2.0",
+    "mz": "^2.6.0",
     "pidusage": "^1.1.5",
     "socket.io": "^2.0.2",
     "tslint": "^5.4.2"

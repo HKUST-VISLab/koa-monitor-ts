@@ -1,13 +1,15 @@
 import monitor from '../index'
 import * as koa from "koa"
 import * as Router from 'koa-router'
-const app = new koa()
+import * as http from "http"
 
-app.use(monitor(app, null))
+const app = new koa()
+const server = http.createServer(app.callback())
+app.use(monitor(server, null))
 let router = new Router()
     .get('/', async (ctx, next) => {
-        ctx.body = 'Hello World4'
+        ctx.body = 'Hello World'
     })
     
 app.use(router.routes())
-app.listen(3000)
+server.listen(3000)
