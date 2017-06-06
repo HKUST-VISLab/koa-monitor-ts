@@ -1,0 +1,25 @@
+{
+  "name": "koa-monitor-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HKUST-VISLab/koa-monitor-ts.git"
+  },
+  "author": "Qiaomu Shen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HKUST-VISLab/koa-monitor-ts/issues"
+  },
+  "homepage": "https://github.com/HKUST-VISLab/koa-monitor-ts#readme",
+  "dependencies": {
+    "koa": "^2.2.0",
+    "koa-router": "^7.2.0",
+    "pidusage": "^1.1.5",
+    "socket.io": "^2.0.2"
+  }
+}
