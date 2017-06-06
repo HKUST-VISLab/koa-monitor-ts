@@ -1,8 +1,8 @@
 "use strict";
 
-
 import * as pidusage from "pidusage";
 import * as socketIo from "socket.io";
+import * as koaIO from "koa-socket";
 import * as handlebars from "handlebars";
 import * as path from "path";
 import * as fs from "mz/fs";
@@ -24,7 +24,7 @@ export let GLOBALCONFIG = {
     }],
 };
 
-let io = null;
+const io = new koaIO();
 
 /**
  * @param [Object] statOption
@@ -99,17 +99,19 @@ function startMonitoring() {
 }
 
 function emitStat(span) {
-    io.emit("stats", {
-        responses: span.responses[span.responses.length - 2],
-        timeRange: span.timeRange,
-    });
+    if (io.broadcast) {
+        io.broadcast("stats", {
+            responses: span.responses[span.responses.length - 2],
+            timeRange: span.timeRange,
+        });
+    }
 }
 
 
 export default function monitoringMiddlewareWrapper(app, config) {
-    io = socketIo().listen(app);
-    io.on('connection', (socket) => {
-        console.log('Connected');
+    io.attach(app);
+    io.on('connection', (ctx)=> {
+        const socket = ctx.socket;
         socket.emit('welcome', { message: 'Welcome!', id: socket.id });
     })
     startMonitoring();
@@ -121,7 +123,7 @@ export default function monitoringMiddlewareWrapper(app, config) {
         if (ctx.path === GLOBALCONFIG.path) {
             ctx.body = template(GLOBALCONFIG);
         }
-        ctx.body = template(GLOBALCONFIG)
+        ctx.body = template(GLOBALCONFIG);
         const startTime = process.hrtime();
         const lastResponses = [];
         GLOBALCONFIG.spans.forEach((span) => {

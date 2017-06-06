@@ -21,6 +21,7 @@
     "handlebars": "^4.0.10",
     "koa": "^2.2.0",
     "koa-router": "^7.2.0",
+    "koa-socket": "^4.4.0",
     "mz": "^2.6.0",
     "pidusage": "^1.1.5",
     "socket.io": "^2.0.2",
