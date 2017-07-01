@@ -107,13 +107,14 @@ function emitStat(span) {
     }
 }
 
-
 export default function monitoringMiddlewareWrapper(app, config) {
     io.attach(app);
-    io.on('connection', (ctx)=> {
+    io.on('connection', (ctx) => {
+        console.log('connect')
         const socket = ctx.socket;
         socket.emit('welcome', { message: 'Welcome!', id: socket.id });
-    })
+    });
+
     startMonitoring();
 
     return async function monitoring(ctx, next) {
@@ -122,20 +123,27 @@ export default function monitoringMiddlewareWrapper(app, config) {
         const template = handlebars.compile(monitoringHtml)
         if (ctx.path === GLOBALCONFIG.path) {
             ctx.body = template(GLOBALCONFIG);
+            const startTime = process.hrtime();
+            const lastResponses = [];
+            GLOBALCONFIG.spans.forEach((span) => {
+                lastResponses.push(lastElement(span.responses));
+            });
+            responseCount(lastResponses);
+            await next();
+            responseTime(startTime, lastResponses);
+        } else if (ctx.url === `${config.path}/frontend.js`) {
+            const pathToJs = path.join(__dirname, 'frontend.js');
+            ctx.body = fs.readFileSync(pathToJs, { encoding: 'utf8' });
+            await next();
+        } else {
+            const startTime = process.hrtime();
+            const lastResponses = [];
+            GLOBALCONFIG.spans.forEach((span) => {
+                lastResponses.push(lastElement(span.responses));
+            });
+            responseCount(lastResponses);
+            await next();
+            responseTime(startTime, lastResponses);
         }
-        ctx.body = template(GLOBALCONFIG);
-        const startTime = process.hrtime();
-        const lastResponses = [];
-        GLOBALCONFIG.spans.forEach((span) => {
-            lastResponses.push(lastElement(span.responses));
-        });
-        responseCount(lastResponses);
-        await next();
-        responseTime(startTime, lastResponses);
     };
 };
-
-
-
-
-
