@@ -194,5 +194,6 @@ socket.on('stats', function (data) {
             timestamps.shift();
         }
         updateData(visData);
+        console.log('here');
     }
 });
